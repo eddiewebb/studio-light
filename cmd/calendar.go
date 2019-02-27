@@ -8,6 +8,7 @@ import (
         "log"
         "net/http"
         "os"
+        "time"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -16,6 +17,8 @@ import (
         "golang.org/x/oauth2"
         "golang.org/x/oauth2/google"
         "google.golang.org/api/calendar/v3"
+
+	"github.com/eddiewebb/blync-studio-light/light"
 )
 
 var client *http.Client
@@ -24,6 +27,7 @@ func init() {
 	calendarCmd.AddCommand(loginCmd)
 	calendarCmd.AddCommand(logoutCmd)
 	calendarCmd.AddCommand(verifyCmd)
+	calendarCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(calendarCmd)
 }
 
@@ -66,26 +70,8 @@ var verifyCmd = &cobra.Command{
 	Long: `Uses your credentials to get an access token for automated interactions`,
 	Run: func(cmd *cobra.Command, args []string) {
 
-        b, err := ioutil.ReadFile("credentials.json")
-        if err != nil {
-                log.Fatalf("Unable to read client secret file: %v", err)
-        }
-		config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
-        if err != nil {
-                log.Fatalf("Unable to parse client secret file to config: %v", err)
-        }
-        client := getClient(config)
-        svc, err := calendar.New(client)
-		if err != nil {
-			log.Fatalf("Unable to create Calendar service: %v", err)
-		}
-		listRes, err := svc.CalendarList.List().Fields("items/id").Do()
-		if err != nil {
-			log.Fatalf("Unable to retrieve list of calendars: %v", err)
-		}
-		for _, v := range listRes.Items {
-			log.Printf("Calendar ID: %v\n", v.Id)
-		}
+        svc := getCalendarService()
+		
 
 		calendarId := viper.GetString("googleCalendar.calendarId")
 		fmt.Println("CalendarId: |" + calendarId +"|")
@@ -105,6 +91,63 @@ var verifyCmd = &cobra.Command{
 		log.Printf("Calendar cal.Id %q next page token: %v\n", cal.Id, res.NextPageToken)
 	},
 }
+
+
+var updateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Set light based n calendar",
+	Run: func(cmd *cobra.Command, args []string) {
+
+		calendarId := viper.GetString("googleCalendar.calendarId")
+
+		minTime := time.Now().Format(time.RFC3339)
+		maxTime := time.Now().Add(time.Minute * 1).Format(time.RFC3339)
+
+		svc := getCalendarService()
+		query := calendar.FreeBusyRequest{
+			TimeMin : minTime,
+			TimeMax : maxTime,
+			Items   : []*calendar.FreeBusyRequestItem{
+				&calendar.FreeBusyRequestItem{ 
+					Id : calendarId,
+				},
+			},
+		}
+		busy, err := svc.Freebusy.Query(&query).Do()
+		if err != nil {
+			log.Fatalf("Unable to retrieve list of calendars: %v", err)
+		}
+
+		fmt.Println(busy)
+
+		if len(busy.Calendars[calendarId].Busy) > 0 {
+			fmt.Println("YOu are busy")
+			light.SetColor("red")
+		}else{
+			fmt.Println("YOu are NOT busy")
+			light.SetColor("green")
+		}
+
+	},
+}
+
+func getCalendarService() *calendar.Service {
+        b, err := ioutil.ReadFile("credentials.json")
+        if err != nil {
+                log.Fatalf("Unable to read client secret file: %v", err)
+        }
+		config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
+        if err != nil {
+                log.Fatalf("Unable to parse client secret file to config: %v", err)
+        }
+        client := getClient(config)
+        svc, err := calendar.New(client)
+		if err != nil {
+			log.Fatalf("Unable to create Calendar service: %v", err)
+		}
+		return svc
+}
+
 
 
 // Retrieve a token, saves the token, then returns the generated client.
