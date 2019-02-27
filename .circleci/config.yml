@@ -1,13 +1,13 @@
 version: 2
 
 executors:
-  golang_image: 
+  golang: 
     docker:
-    - image: circleci/golang:1.11
+      - image: circleci/golang:1.11
 
 jobs:
   test:
-    executor: golang_image
+    executor: golang
     environment:
       TEST_REPORTS: /tmp/test-reports
     steps:
@@ -47,7 +47,7 @@ jobs:
 
   
   lint:
-    executor: golang_image
+    executor: golang
     steps:
       - checkout
       - run:
