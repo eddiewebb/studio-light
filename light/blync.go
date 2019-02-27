@@ -25,6 +25,10 @@ func SetColor(color string){
 	light := blync.NewBlyncLight()
 	light.SetColor(colorMap[color],device)
 }
+func SetColorRgb(r int, g int, b int){
+	light := blync.NewBlyncLight()
+	light.SetColor([3]byte{byte(r),byte(g),byte(b)},device)
+}
 
 func Off(){	
 	light := blync.NewBlyncLight()

@@ -1,0 +1,70 @@
+version: 2
+
+references:
+  golang_image: &golang_image
+    image: circleci/golang:1.11
+
+jobs:
+  test:
+    docker:
+      - *golang_image
+    environment:
+      TEST_REPORTS: /tmp/test-reports
+    steps:
+      - checkout
+
+      - restore_cache:
+          # Always restore the latest cache
+          keys: [v2-build-tools-]
+
+      - run:
+          name: Install Dependencies
+          command: |
+            mkdir -p ${TEST_REPORTS}
+            mkdir -p /go/pkg/mod
+            [[ -e /go/bin/gotestsum ]] && exit
+            curl -sSL https://github.com/gotestyourself/gotestsum/releases/download/v0.3.2/gotestsum_0.3.2_linux_amd64.tar.gz | \
+              tar -xz -C /go/bin gotestsum
+
+      - run:
+          name: Test
+          environment:
+            GOTESTSUM_JUNITFILE: /tmp/test-reports/go-test-report.xml
+          command: |
+            gotestsum -- -race -tags="integration" ./...
+
+      - store_artifacts:
+          path: /tmp/test-reports
+          destination: raw-test-output
+
+      - store_test_results:
+          path: /tmp/test-reports
+
+      - save_cache:
+          key: v2-build-tools-{{ checksum "/go/bin/gotestsum" }}
+          paths:
+            - /go/bin/gotestsum
+
+  
+  lint:
+    docker:
+      - *golang_image
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: |
+            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.12.5
+      - run: |
+          export PATH=$PATH:./bin
+          mkdir -p /go/pkg/mod
+          go mod download
+          golangci-lint run
+
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - test
+      - lint

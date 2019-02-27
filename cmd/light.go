@@ -7,13 +7,16 @@ import (
 )
 
 func init() {
+	rootCmd.AddCommand(lightCmd)
 	lightCmd.PersistentFlags().StringP("color","c","red","What color?")
 	lightCmd.AddCommand(onCmd)
+	lightCmd.AddCommand(onRgbCmd)
+	onRgbCmd.Flags().IntP("R","r",255,"R value 0-255")
+	onRgbCmd.Flags().IntP("G","g",255,"G value 0-255")
+	onRgbCmd.Flags().IntP("B","b",255,"B value 0-255")
 	lightCmd.AddCommand(offCmd)
-	rootCmd.AddCommand(lightCmd)
 }
 
-// configCmd represents the config command
 var lightCmd = &cobra.Command{
 	Use:   "light",
 	Short: "Interact with connected light",
@@ -21,7 +24,6 @@ var lightCmd = &cobra.Command{
 	
 }
 
-// configCmd represents the config command
 var onCmd = &cobra.Command{
 	Use:   "on",
 	Short: "Turn studio light on",
@@ -33,8 +35,20 @@ var onCmd = &cobra.Command{
 		light.SetColor(color)
 	},
 }
+var onRgbCmd = &cobra.Command{
+	Use:   "rgb",
+	Short: "Send rgb codes as",
+	Long: `Turns the connected Blync light on.
 
-// configCmd represents the config command
+	Will assume red on index 0 unless specified with flags`,
+	Run: func(cmd *cobra.Command, args []string) {
+		r,_ := cmd.Flags().GetInt("R")
+		g,_ := cmd.Flags().GetInt("G")
+		b,_ := cmd.Flags().GetInt("B")
+		light.SetColorRgb(r, g, b)
+	},
+}
+
 var offCmd = &cobra.Command{
 	Use:   "off",
 	Short: "Turn studio light off",
