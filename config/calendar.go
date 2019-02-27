@@ -2,6 +2,5 @@ package config
 
 
 type GoogleCalendarConfiguration struct {
-	CalendarUri string
-	ApiToken string
+	CalendarId string
 }

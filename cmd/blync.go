@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	onCmd.Flags().StringP("color","c","red","Device index for light to interface with")
+	lightCmd.PersistentFlags().StringP("color","c","red","Device index for light to interface with")
 	lightCmd.AddCommand(onCmd)
 	lightCmd.AddCommand(offCmd)
 	rootCmd.AddCommand(lightCmd)

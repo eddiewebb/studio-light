@@ -15,11 +15,9 @@
 package cmd
 
 import (
-    "bufio"
     "fmt"
-    "os"
-
 	"github.com/spf13/cobra"
+
 	"github.com/spf13/viper"
 	"github.com/eddiewebb/blync-studio-light/config"
 )
@@ -29,13 +27,12 @@ var C config.Configuration
 // configCmd represents the config command
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Set or show configurations",
+	Long: `Covers various configurations including:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+- Default device index (0)
+- Calendar information
+- Rules`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Viper Debug:")
 		viper.Debug()
@@ -54,7 +51,7 @@ var setConfigCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		newconfig := promptForCalValues()
 		viper.Set("GoogleCalendar",newconfig)
-		fmt.Println("ttempt to create new file"  + cfgFile)
+		fmt.Println("Attempt to create new file"  + cfgFile)
 		if err := viper.WriteConfigAs(cfgFile); err != nil {
 			fmt.Println(err)
 		}
@@ -64,18 +61,17 @@ var setConfigCmd = &cobra.Command{
 
 func promptForCalValues() config.GoogleCalendarConfiguration{
 	gcalconfig := config.GoogleCalendarConfiguration{
-		CalendarUri : prompt("What is the Calendar URI?"),
-		ApiToken	: prompt("What is your API Token?"),
+		CalendarId : prompt("What is the Calendar ID (as seen in settings)?"),
 	}
 
 	return gcalconfig
 }
 
 func prompt(message string) string{
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(message)
-	text, _ := reader.ReadString('\n')
-	return text
+    var input string
+    fmt.Scanln(&input)
+    return input
 }
 
 func init() {
