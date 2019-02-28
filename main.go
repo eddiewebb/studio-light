@@ -16,7 +16,6 @@ package main
 
 import "github.com/eddiewebb/blync-studio-light/cmd"
 
-
 func main() {
 	cmd.Execute()
 }

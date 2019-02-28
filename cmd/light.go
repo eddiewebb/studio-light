@@ -1,27 +1,25 @@
 package cmd
 
-
 import (
-	"github.com/spf13/cobra"
 	"github.com/eddiewebb/blync-studio-light/light"
+	"github.com/spf13/cobra"
 )
 
 func init() {
 	rootCmd.AddCommand(lightCmd)
-	lightCmd.PersistentFlags().StringP("color","c","red","What color?")
+	lightCmd.PersistentFlags().StringP("color", "c", "red", "What color?")
 	lightCmd.AddCommand(onCmd)
 	lightCmd.AddCommand(onRgbCmd)
-	onRgbCmd.Flags().IntP("R","r",255,"R value 0-255")
-	onRgbCmd.Flags().IntP("G","g",255,"G value 0-255")
-	onRgbCmd.Flags().IntP("B","b",255,"B value 0-255")
+	onRgbCmd.Flags().IntP("R", "r", 255, "R value 0-255")
+	onRgbCmd.Flags().IntP("G", "g", 255, "G value 0-255")
+	onRgbCmd.Flags().IntP("B", "b", 255, "B value 0-255")
 	lightCmd.AddCommand(offCmd)
 }
 
 var lightCmd = &cobra.Command{
 	Use:   "light",
 	Short: "Interact with connected light",
-	Long: `Bypass other automation and interact directly with the LED light`,
-	
+	Long:  `Bypass other automation and interact directly with the LED light`,
 }
 
 var onCmd = &cobra.Command{
@@ -31,7 +29,7 @@ var onCmd = &cobra.Command{
 
 	Will assume red on index 0 unless specified with flags`,
 	Run: func(cmd *cobra.Command, args []string) {
-		color,_ := cmd.Flags().GetString("color")
+		color, _ := cmd.Flags().GetString("color")
 		light.SetColor(color)
 	},
 }
@@ -42,9 +40,9 @@ var onRgbCmd = &cobra.Command{
 
 	Will assume red on index 0 unless specified with flags`,
 	Run: func(cmd *cobra.Command, args []string) {
-		r,_ := cmd.Flags().GetInt("R")
-		g,_ := cmd.Flags().GetInt("G")
-		b,_ := cmd.Flags().GetInt("B")
+		r, _ := cmd.Flags().GetInt("R")
+		g, _ := cmd.Flags().GetInt("G")
+		b, _ := cmd.Flags().GetInt("B")
 		light.SetColorRgb(r, g, b)
 	},
 }
@@ -52,9 +50,8 @@ var onRgbCmd = &cobra.Command{
 var offCmd = &cobra.Command{
 	Use:   "off",
 	Short: "Turn studio light off",
-	Long: `Turns the connected light light off.`,
+	Long:  `Turns the connected light light off.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		light.Off()
 	},
 }
-

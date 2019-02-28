@@ -15,11 +15,11 @@
 package cmd
 
 import (
-    "fmt"
+	"fmt"
 	"github.com/spf13/cobra"
 
-	"github.com/spf13/viper"
 	"github.com/eddiewebb/blync-studio-light/config"
+	"github.com/spf13/viper"
 )
 
 var C config.Configuration
@@ -36,7 +36,7 @@ var configCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Viper Debug:")
 		viper.Debug()
-		if err := viper.Unmarshal(&C); err != nil{
+		if err := viper.Unmarshal(&C); err != nil {
 			fmt.Println(err)
 		}
 		fmt.Println("Calendar Values:")
@@ -47,11 +47,11 @@ var configCmd = &cobra.Command{
 var setConfigCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Write new config based on user prompts",
-	Long: `We'll ask some questions to generate an initial config file.`,
+	Long:  `We'll ask some questions to generate an initial config file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		newconfig := promptForCalValues()
-		viper.Set("GoogleCalendar",newconfig)
-		fmt.Println("Attempt to create new file"  + cfgFile)
+		viper.Set("GoogleCalendar", newconfig)
+		fmt.Println("Attempt to create new file" + cfgFile)
 		if err := viper.WriteConfigAs(cfgFile); err != nil {
 			fmt.Println(err)
 		}
@@ -59,19 +59,19 @@ var setConfigCmd = &cobra.Command{
 	},
 }
 
-func promptForCalValues() config.GoogleCalendarConfiguration{
+func promptForCalValues() config.GoogleCalendarConfiguration {
 	gcalconfig := config.GoogleCalendarConfiguration{
-		CalendarId : prompt("What is the Calendar ID (as seen in settings)?"),
+		CalendarId: prompt("What is the Calendar ID (as seen in settings)?"),
 	}
 
 	return gcalconfig
 }
 
-func prompt(message string) string{
+func prompt(message string) string {
 	fmt.Print(message)
-    var input string
-    fmt.Scanln(&input)
-    return input
+	var input string
+	fmt.Scanln(&input)
+	return input
 }
 
 func init() {

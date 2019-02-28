@@ -54,7 +54,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.blync-studio-light.yaml)")
-	rootCmd.PersistentFlags().IntP("device","d",0,"Device index for light to interface with")
+	rootCmd.PersistentFlags().IntP("device", "d", 0, "Device index for light to interface with")
 	//nolint:errcheck
 	viper.BindPFlag("device", rootCmd.Flags().Lookup("device"))
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
