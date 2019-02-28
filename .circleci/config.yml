@@ -13,20 +13,16 @@ jobs:
     steps:
       - checkout
 
-      - restore_cache:
-          # Always restore the latest cache
-          keys: [v2-build-tools-]
-
       - run:
           name: Install Dependencies
           command: |
+            sudo apt-get -y install libusb-1.0-0-dev
             mkdir -p ${TEST_REPORTS}
             mkdir -p /go/pkg/mod
             [[ -e /go/bin/gotestsum ]] && exit
             curl -sSL https://github.com/gotestyourself/gotestsum/releases/download/v0.3.2/gotestsum_0.3.2_linux_amd64.tar.gz | \
               tar -xz -C /go/bin gotestsum
 
-            sudo apt-get -y install libusb-1.0-0-dev
       - run:
           name: Test
           environment:
@@ -40,11 +36,6 @@ jobs:
 
       - store_test_results:
           path: /tmp/test-reports
-
-      - save_cache:
-          key: v2-build-tools-{{ checksum "/go/bin/gotestsum" }}
-          paths:
-            - /go/bin/gotestsum
 
   
   lint:

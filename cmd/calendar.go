@@ -43,7 +43,6 @@ var loginCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Unable to read client secret file: %v", err)
 		}
-
 		// If modifying these scopes, delete your previously saved token.json.
 		config, err := google.ConfigFromJSON(b, calendar.CalendarReadonlyScope)
 		if err != nil {
@@ -65,9 +64,7 @@ var verifyCmd = &cobra.Command{
 	Short: "COnfirm calendar status",
 	Long:  `Uses your credentials to get an access token for automated interactions`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 		svc := getCalendarService()
-
 		calendarId := viper.GetString("googleCalendar.calendarId")
 		fmt.Println("CalendarId: |" + calendarId + "|")
 		cal, err := svc.CalendarList.Get(calendarId).Do()
@@ -91,12 +88,9 @@ var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Set light based n calendar",
 	Run: func(cmd *cobra.Command, args []string) {
-
 		calendarId := viper.GetString("googleCalendar.calendarId")
-
 		minTime := time.Now().Format(time.RFC3339)
-		maxTime := time.Now().Add(time.Minute * 1).Format(time.RFC3339)
-
+		maxTime := time.Now().Add(time.Minute * 5).Format(time.RFC3339)
 		svc := getCalendarService()
 		query := calendar.FreeBusyRequest{
 			TimeMin: minTime,
@@ -111,9 +105,6 @@ var updateCmd = &cobra.Command{
 		if err != nil {
 			log.Fatalf("Unable to retrieve list of calendars: %v", err)
 		}
-
-		fmt.Println(busy)
-
 		if len(busy.Calendars[calendarId].Busy) > 0 {
 			fmt.Println("YOu are busy")
 			light.SetColor("red")
@@ -121,7 +112,6 @@ var updateCmd = &cobra.Command{
 			fmt.Println("YOu are NOT busy")
 			light.SetColor("green")
 		}
-
 	},
 }
 
