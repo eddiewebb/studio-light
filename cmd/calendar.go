@@ -92,26 +92,23 @@ var updateCmd = &cobra.Command{
 		minTime := time.Now().Format(time.RFC3339)
 		maxTime := time.Now().Add(time.Minute * 5).Format(time.RFC3339)
 		svc := getCalendarService()
-		query := calendar.FreeBusyRequest{
-			TimeMin: minTime,
-			TimeMax: maxTime,
-			Items: []*calendar.FreeBusyRequestItem{
-				&calendar.FreeBusyRequestItem{
-					Id: calendarId,
-				},
-			},
-		}
-		busy, err := svc.Freebusy.Query(&query).Do()
+		events, err := svc.Events.List(calendarId).ShowDeleted(false).TimeMin(minTime).TimeMax(maxTime).SingleEvents(true).Do()
 		if err != nil {
-			log.Fatalf("Unable to retrieve list of calendars: %v", err)
+			log.Fatalf("Unable to retrieve list of events: %v", err)
 		}
-		if len(busy.Calendars[calendarId].Busy) > 0 {
-			fmt.Println("YOu are busy")
-			light.SetColor("red")
-		} else {
-			fmt.Println("YOu are NOT busy")
-			light.SetColor("green")
-		}
+
+		for _,event := range events.Items{
+			//fmt.Println(event.Creator.Email)
+			fmt.Printf("%s Event %s is %s\n",event.Transparency, event.Summary, event.Status)
+			// if calendar is only free/busy access, we can only use confirmed status. 
+			// If we have full acces check addtional attributes
+			if event.Status == "confirmed" && event.Transparency != "transparent" {
+				light.SetColor("red")
+				return
+			}
+		}		
+		fmt.Println("No accepted events, or accepted events marked Free!")
+		light.SetColor("green")
 	},
 }
 
