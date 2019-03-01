@@ -3,10 +3,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"flag"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"log"
+	"github.com/golang/glog"
 	"net/http"
 	"os"
 	"time"
@@ -27,6 +28,7 @@ func init() {
 	calendarCmd.AddCommand(verifyCmd)
 	calendarCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(calendarCmd)
+	flag.Parse()
 }
 
 var calendarCmd = &cobra.Command{
@@ -41,12 +43,12 @@ var loginCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		b, err := ioutil.ReadFile("credentials.json")
 		if err != nil {
-			log.Fatalf("Unable to read client secret file: %v", err)
+			glog.Fatalf("Unable to read client secret file: %v", err)
 		}
 		// If modifying these scopes, delete your previously saved token.json.
 		config, err := google.ConfigFromJSON(b, calendar.CalendarReadonlyScope)
 		if err != nil {
-			log.Fatalf("Unable to parse client secret file to config: %v", err)
+			glog.Fatalf("Unable to parse client secret file to config: %v", err)
 		}
 		client = getClient(config)
 
@@ -69,18 +71,18 @@ var verifyCmd = &cobra.Command{
 		fmt.Println("CalendarId: |" + calendarId + "|")
 		cal, err := svc.CalendarList.Get(calendarId).Do()
 		if err != nil {
-			log.Fatalf("Unable to retrieve calendar: %v", err)
+			glog.Fatalf("Unable to retrieve calendar: %v", err)
 		}
 
 		res, err := svc.Events.List(cal.Id).Fields("items(updated,summary)", "summary", "nextPageToken").Do()
 		if err != nil {
-			log.Fatalf("Unable to retrieve calendar events list: %v", err)
+			glog.Fatalf("Unable to retrieve calendar events list: %v", err)
 		}
 		for _, v := range res.Items {
-			log.Printf("Calendar ID %q event: %v: %q\n", cal.Id, v.Updated, v.Summary)
+			fmt.Printf("Calendar ID %q event: %v: %q\n", cal.Id, v.Updated, v.Summary)
 		}
-		log.Printf("Calendar cal.Id %q Summary: %v\n", cal.Id, res.Summary)
-		log.Printf("Calendar cal.Id %q next page token: %v\n", cal.Id, res.NextPageToken)
+		fmt.Printf("Calendar cal.Id %q Summary: %v\n", cal.Id, res.Summary)
+		fmt.Printf("Calendar cal.Id %q next page token: %v\n", cal.Id, res.NextPageToken)
 	},
 }
 
@@ -92,39 +94,63 @@ var updateCmd = &cobra.Command{
 		minTime := time.Now().Format(time.RFC3339)
 		maxTime := time.Now().Add(time.Minute * 5).Format(time.RFC3339)
 		svc := getCalendarService()
-		events, err := svc.Events.List(calendarId).ShowDeleted(false).TimeMin(minTime).TimeMax(maxTime).SingleEvents(true).Do()
+		events, err := svc.Events.List(calendarId).ShowHiddenInvitations(true).TimeMin(minTime).TimeMax(maxTime).SingleEvents(true).Do()
 		if err != nil {
-			log.Fatalf("Unable to retrieve list of events: %v", err)
+			glog.Fatalf("Unable to retrieve list of events: %v", err)
 		}
 
+		color := "green"
 		for _,event := range events.Items{
-			//fmt.Println(event.Creator.Email)
-			fmt.Printf("%s Event %s is %s\n",event.Transparency, event.Summary, event.Status)
+			glog.Infof("%+v\n",event)
+
 			// if calendar is only free/busy access, we can only use confirmed status. 
 			// If we have full acces check addtional attributes
-			if event.Status == "confirmed" && event.Transparency != "transparent" {
-				light.SetColor("red")
-				return
-			}
+			if event.Transparency == "transparent" {
+				//event is marked "free" in calendar, dont mark busy
+				glog.Infoln("Event is marked free, ignore")
+				continue
+			}else{			
+				status := event.Status	
+				glog.Infof("Set status to %s based on event\n",status)
+				for _,attendee := range event.Attendees{
+					if attendee.Email == calendarId{
+						status = attendee.ResponseStatus
+						glog.Infof("Updated status to %s based on attendee %s\n",status, attendee.Email)
+						break
+					}
+				}
+				if status == "tentative" || status == "needsAction" {
+					// event is worth noting, but could be one of many. Set to yellow and keep lookinh
+					glog.Infof("Yellow\n")
+					color = "yellow"
+					continue
+				}else if status == "confirmed" || status == "accepted" {
+					// busy event, mark red and stop loooking
+					color = "red"
+					glog.Infof("Red\n")
+					break
+				}
+			} 
 		}		
-		fmt.Println("No accepted events, or accepted events marked Free!")
-		light.SetColor("green")
+
+		light.SetColor(color)
+		glog.Infoln("Updated!")
 	},
 }
 
 func getCalendarService() *calendar.Service {
 	b, err := ioutil.ReadFile("credentials.json")
 	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
+		glog.Fatalf("Unable to read client secret file: %v", err)
 	}
 	config, err := google.ConfigFromJSON(b, calendar.CalendarScope)
 	if err != nil {
-		log.Fatalf("Unable to parse client secret file to config: %v", err)
+		glog.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 	client := getClient(config)
 	svc, err := calendar.New(client)
 	if err != nil {
-		log.Fatalf("Unable to create Calendar service: %v", err)
+		glog.Fatalf("Unable to create Calendar service: %v", err)
 	}
 	return svc
 }
@@ -151,12 +177,12 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 
 	var authCode string
 	if _, err := fmt.Scan(&authCode); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
+		glog.Fatalf("Unable to read authorization code: %v", err)
 	}
 
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		glog.Fatalf("Unable to retrieve token from web: %v", err)
 	}
 	return tok
 }
@@ -178,10 +204,10 @@ func saveToken(path string, token *oauth2.Token) {
 	fmt.Printf("Saving credential file to: %s\n", path)
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
+		glog.Fatalf("Unable to cache oauth token: %v", err)
 	}
 	defer f.Close()
 	if err := json.NewEncoder(f).Encode(token); err != nil {
-		log.Fatalf("Encoding issue: %v", err)
+		glog.Fatalf("Encoding issue: %v", err)
 	}
 }

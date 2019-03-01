@@ -12,7 +12,7 @@ var colorMap = map[string][3]byte{
 	"red" : blync.Red,
 	"blue" : blync.Blue,
 	"green" : blync.Green,
-	"yellow" : [3]byte{255, 255, 0},
+	"yellow" : [3]byte{255, 240, 0},
 	"purple" : [3]byte{80, 0, 80},
 	"white" : [3]byte{255, 255, 128},
 	"orange" : [3]byte{255, 60, 0},
