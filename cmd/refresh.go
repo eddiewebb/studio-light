@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"github.com/eddiewebb/blync-studio-light/calendars"
+	"github.com/eddiewebb/blync-studio-light/config"
+	"github.com/eddiewebb/blync-studio-light/lights"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/eddiewebb/blync-studio-light/lights"
-	"github.com/eddiewebb/blync-studio-light/calendars"
+	"os"
+	"time"
 )
-
 
 func init() {
 	rootCmd.AddCommand(calendarCmd)
@@ -16,7 +19,36 @@ func init() {
 var calendarCmd = &cobra.Command{
 	Use:   "refresh",
 	Short: "Interact with calendar (login)",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		verbose, _ := cmd.Flags().GetBool("verbose")
+		if verbose {
+			log.SetLevel(log.InfoLevel)
+			log.Info("Verbose logging enabled")
+		}
+
+		var schedule config.StudioLightSchedule
+		viper.UnmarshalKey("schedule", &schedule)
+
+		today := time.Now().Weekday()
+		offClock := minutesOfDay(schedule.OffHour, schedule.OffMinute)
+		onClock := minutesOfDay(schedule.OnHour, schedule.OnMinute)
+		nowHours, nowMinutes, _ := time.Now().Clock()
+		now := minutesOfDay(nowHours, nowMinutes)
+		log.Infof("Day: %s, TimeNow: %v:%v, onHour: %v:%02d, offHour: %v:%02d",today, nowHours, nowMinutes, schedule.OnHour, schedule.OnMinute, schedule.OffHour, schedule.OffMinute)
+		if onClock <= now && now < offClock && ! schedule.DaysOffContains(int(today)) {
+			log.Info("Time is within schedule. Run `config schedule` to set/adjust off hours")
+		} else {
+			log.Warn("Time is outside configured schedule, lights off. Run `config schedule` to change off hours")
+			light.Off()
+			os.Exit(0)
+		}
+	},
 }
+
+func minutesOfDay(hour int, minutes int) int {
+	return (hour * 60) + minutes
+}
+
 
 var updateCmd = &cobra.Command{
 	Use:   "calendar",
@@ -24,9 +56,9 @@ var updateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		calendarId := viper.GetString("googleCalendar.calendarId")
 		email := viper.GetString("googleCalendar.email")
-		calendar := calendars.NewGoogleCalendarFromExistingToken()
-		light.SetColor(calendar.GetColor(calendarId,email))
-	},
-		
-}
 
+		log.Infof("checking calendar %s for %s status", calendarId, email)
+		calendar := calendars.NewGoogleCalendarFromExistingToken()
+		light.SetColor(calendar.GetColor(calendarId, email))
+	},
+}

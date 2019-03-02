@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	
-  	log "github.com/sirupsen/logrus"
+
+	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
 
@@ -18,23 +18,21 @@ import (
 const tokFile = "token.json"
 
 type GoogleCalendar struct {
-	service 		*gcal.Service
+	service *gcal.Service
 }
 
-
-func NewGoogleCalendarFromExistingToken() (googleCalendar GoogleCalendar){
+func NewGoogleCalendarFromExistingToken() (googleCalendar GoogleCalendar) {
 	googleCalendar.service = getCalendarService()
 	return
 }
 
-func NewGoogleCalendarFromNewToken() (googleCalendar GoogleCalendar){
+func NewGoogleCalendarFromNewToken() (googleCalendar GoogleCalendar) {
 	generateAccessToken()
 	googleCalendar.service = getCalendarService()
 	return
-}	
+}
 
-
-func (c *GoogleCalendar)  Verify(calendarId string) {
+func (c *GoogleCalendar) Verify(calendarId string) {
 	fmt.Println("CalendarId: |" + calendarId + "|")
 	cal, err := c.service.CalendarList.Get(calendarId).Do()
 	if err != nil {
@@ -49,10 +47,10 @@ func (c *GoogleCalendar)  Verify(calendarId string) {
 		fmt.Printf("Calendar ID %q event: %v: %q\n", cal.Id, v.Updated, v.Summary)
 	}
 	fmt.Printf("Calendar cal.Id %q Summary: %v\n", cal.Id, res.Summary)
-	fmt.Printf("Calendar cal.Id %q next page token: %v\n", cal.Id, res.NextPageToken)	
+	fmt.Printf("Calendar cal.Id %q next page token: %v\n", cal.Id, res.NextPageToken)
 }
 
-func (c *GoogleCalendar) GetColor(calendarId string, userEmail string) string{
+func (c *GoogleCalendar) GetColor(calendarId string, userEmail string) string {
 	log.Infof("Checking Status")
 	minTime := time.Now().Format(time.RFC3339)
 	maxTime := time.Now().Add(time.Minute * 5).Format(time.RFC3339)
@@ -63,22 +61,22 @@ func (c *GoogleCalendar) GetColor(calendarId string, userEmail string) string{
 
 	color := "green"
 	if len(events.Items) > 0 {
-		for _,event := range events.Items{
+		for _, event := range events.Items {
 			//log.Infof("%+v\n",event)
-			// if calendar is only free/busy access, we can only use confirmed status. 
+			// if calendar is only free/busy access, we can only use confirmed status.
 			// If we have full acces check addtional attributes
 			if event.Transparency == "transparent" {
 				//event is marked "free" in calendar, dont mark busy
-				log.Infof("Event %s is marked free, ignore\n",event.Summary)
+				log.Infof("Event %s is marked free, ignore\n", event.Summary)
 				continue
-			}else{			
+			} else {
 				// Things we created have status confirmed, no attendees.
-				status := event.Status	
+				status := event.Status
 				// For invites sent to us, check out reply
-				for _,attendee := range event.Attendees{
-					if attendee.Email == userEmail{
+				for _, attendee := range event.Attendees {
+					if attendee.Email == userEmail {
 						status = attendee.ResponseStatus
-						log.Infof("Updated status to %s based on attendee %s\n",status, attendee.Email)
+						log.Infof("Updated status to %s based on attendee %s\n", status, attendee.Email)
 						break
 					}
 				}
@@ -87,23 +85,23 @@ func (c *GoogleCalendar) GetColor(calendarId string, userEmail string) string{
 					log.Infof("Event %s is marked %s\n", event.Summary, status)
 					color = "yellow"
 					continue
-				}else if status == "confirmed" || status == "accepted" {
+				} else if status == "confirmed" || status == "accepted" {
 					// busy event, mark red and stop loooking
 					log.Infof("Event %s is marked %s\n", event.Summary, status)
 					color = "red"
 					break
 				}
-			} 
-		}	
+			}
+		}
 	} else {
 		log.Infof("No events currently scheduled.")
 	}
 	log.Infof("Setting light %s", color)
 	return color
-	
+
 }
 
-func generateAccessToken(){
+func generateAccessToken() {
 	config := readConfig()
 	tok := getTokenFromWeb(config)
 	saveToken(tokFile, tok)
@@ -114,7 +112,7 @@ func getCalendarService() *gcal.Service {
 	if err != nil {
 		log.Fatalln("No token.json found. Have you config init'd ?")
 		os.Exit(1)
-	}		
+	}
 	config := readConfig()
 	svc, err := gcal.New(config.Client(context.Background(), tok))
 	if err != nil {
@@ -123,7 +121,7 @@ func getCalendarService() *gcal.Service {
 	return svc
 }
 
-func readConfig() *oauth2.Config{
+func readConfig() *oauth2.Config {
 	b, err := ioutil.ReadFile("credentials.json")
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)

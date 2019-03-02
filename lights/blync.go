@@ -8,30 +8,30 @@ import (
 var device int
 
 var colorMap = map[string][3]byte{
-	"off" : [3]byte{0x00, 0x00, 0x00},
-	"red" : blync.Red,
-	"blue" : blync.Blue,
-	"green" : blync.Green,
-	"yellow" : [3]byte{255, 240, 0},
-	"purple" : [3]byte{80, 0, 80},
-	"white" : [3]byte{255, 255, 128},
-	"orange" : [3]byte{255, 60, 0},
+	"off":    {0x00, 0x00, 0x00},
+	"red":    blync.Red,
+	"blue":   blync.Blue,
+	"green":  blync.Green,
+	"yellow": {255, 240, 0},
+	"purple": {80, 0, 80},
+	"white":  {255, 255, 128},
+	"orange": {255, 60, 0},
 }
 
-func init(){
+func init() {
 	device = viper.GetInt("device")
 }
 
-func SetColor(color string){
+func SetColor(color string) {
 	light := blync.NewBlyncLight()
-	light.SetColor(colorMap[color],device)
+	light.SetColor(colorMap[color], device)
 }
-func SetColorRgb(r int, g int, b int){
+func SetColorRgb(r int, g int, b int) {
 	light := blync.NewBlyncLight()
-	light.SetColor([3]byte{byte(r),byte(g),byte(b)},device)
+	light.SetColor([3]byte{byte(r), byte(g), byte(b)}, device)
 }
 
-func Off(){	
+func Off() {
 	light := blync.NewBlyncLight()
-	light.SetColor(colorMap["off"],device)
+	light.SetColor(colorMap["off"], device)
 }
