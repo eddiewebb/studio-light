@@ -27,7 +27,9 @@ var calendarCmd = &cobra.Command{
 		}
 
 		var schedule config.StudioLightSchedule
-		viper.UnmarshalKey("schedule", &schedule)
+		if err := viper.UnmarshalKey("schedule", &schedule); err != nil {
+			log.Info("no schedule in config")
+		}
 
 		today := time.Now().Weekday()
 		offClock := minutesOfDay(schedule.OffHour, schedule.OffMinute)

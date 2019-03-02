@@ -26,7 +26,6 @@ import (
 
 // default in initConfig, unless passed as flag
 var cfgFile string
-var verbose bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
