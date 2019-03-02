@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"fmt"
-	"flag"
+	log  "github.com/sirupsen/logrus"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -26,7 +26,7 @@ import (
 
 // default in initConfig, unless passed as flag
 var cfgFile string
-
+var verbose bool
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "blync-studio-light",
@@ -37,6 +37,12 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {	
+		if verbose {
+			log.SetLevel(log.InfoLevel)
+			log.Info("Verbose logging enabled")
+		} 
+	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },
@@ -45,7 +51,6 @@ to quickly create a Cobra application.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -53,14 +58,18 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
+	log.SetLevel(log.WarnLevel)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.blync-studio-light.yaml)")
 	rootCmd.PersistentFlags().IntP("device", "d", 0, "Device index for light to interface with")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose","v", false, "Include info level logs")
 	//nolint:errcheck
 	viper.BindPFlag("device", rootCmd.PersistentFlags().Lookup("device"))
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	flag.Parse()
+
+
+	cobra.OnInitialize(initConfig)
+
+
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -86,8 +95,8 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Infoln("Using config file:", viper.ConfigFileUsed())
 	} else {
-		fmt.Println("No configuration found, functionality will be limited until you run `config init` ")
+		log.Warnln("No configuration found, functionality will be limited until you run `config init` ")
 	}
 }

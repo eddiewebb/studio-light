@@ -9,8 +9,8 @@ import (
 
 
 func init() {
-	calendarCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(calendarCmd)
+	calendarCmd.AddCommand(updateCmd)
 }
 
 var calendarCmd = &cobra.Command{
