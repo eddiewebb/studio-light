@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/eddiewebb/blync-studio-light/config"
+	"github.com/eddiewebb/blync-studio-light/calendars"
 	"github.com/spf13/viper"
 )
 
@@ -56,14 +57,17 @@ var setConfigCmd = &cobra.Command{
 			fmt.Println(err)
 		}
 		fmt.Println("config set in " + viper.ConfigFileUsed())
+
+		gcal := calendars.NewGoogleCalendarFromNewToken()
+		gcal.Verify(newconfig.CalendarId)
 	},
 }
 
 func promptForCalValues() config.GoogleCalendarConfiguration {
 	gcalconfig := config.GoogleCalendarConfiguration{
-		CalendarId: prompt("What is the Calendar ID (as seen in settings)?"),
+		CalendarId: prompt("What is the Calendar ID (as seen in settings, usally your email)? "),
+		Email: prompt("What is the email of the attendee to base status on? "),
 	}
-
 	return gcalconfig
 }
 
