@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"fmt"
-	log  "github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -26,7 +26,7 @@ import (
 
 // default in initConfig, unless passed as flag
 var cfgFile string
-var verbose bool
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "blync-studio-light",
@@ -37,11 +37,12 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {	
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		verbose, _ := cmd.Flags().GetBool("verbose")
 		if verbose {
 			log.SetLevel(log.InfoLevel)
 			log.Info("Verbose logging enabled")
-		} 
+		}
 	},
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
@@ -61,14 +62,12 @@ func init() {
 	log.SetLevel(log.WarnLevel)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.blync-studio-light.yaml)")
 	rootCmd.PersistentFlags().IntP("device", "d", 0, "Device index for light to interface with")
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose","v", false, "Include info level logs")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Include info level logs")
 	//nolint:errcheck
 	viper.BindPFlag("device", rootCmd.PersistentFlags().Lookup("device"))
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-
 	cobra.OnInitialize(initConfig)
-
 
 }
 
