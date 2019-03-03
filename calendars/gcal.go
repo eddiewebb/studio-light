@@ -13,55 +13,72 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	gcal "google.golang.org/api/calendar/v3"
+	"github.com/eddiewebb/blync-studio-light/config"
 )
 
+const configSuffix = "/.studio-light/gcal/" // where in users home directory which contains files below
 const tokFile = "token.json"
+const credsFile = "credentials.json"
 
-type GoogleCalendar struct {
+
+type CalendarDAL interface {
+	ResolveEventList(calendarId string) []*gcal.Event
+}
+
+// GoogleCalendarDAL implements interface CalendarDAL
+type GoogleCalendarDAL struct {
 	service *gcal.Service
 }
 
-func NewGoogleCalendarFromExistingToken() (googleCalendar GoogleCalendar) {
-	googleCalendar.service = getCalendarService()
-	return
+
+type GoogleCalendar struct {
+	dal CalendarDAL
 }
 
-func NewGoogleCalendarFromNewToken() (googleCalendar GoogleCalendar) {
-	generateAccessToken()
-	googleCalendar.service = getCalendarService()
-	return
+
+func NewGoogleCalendar() (GoogleCalendar, error) {
+	token, err := tokenFromFile(getFullPath(tokFile))
+	if err != nil{
+		generateAccessToken()
+		/*tok, err := tokenFromFile(token)
+		if err != nil {
+			log.Warn(err)
+			log.Fatalln("No token.json found. Have you config init'd ?")
+			os.Exit(1)
+		}*/
+	}
+
+	service, err := getCalendarService(token)
+	if err != nil{
+		return GoogleCalendar{}, err
+	}
+	dal := GoogleCalendarDAL{
+
+		service : service,
+	}
+	cal := GoogleCalendar{
+		dal: &dal,
+	}
+	return cal, err
 }
 
-func (c *GoogleCalendar) Verify(calendarId string) {
-	fmt.Println("CalendarId: |" + calendarId + "|")
-	cal, err := c.service.CalendarList.Get(calendarId).Do()
-	if err != nil {
-		log.Fatalf("Unable to retrieve calendar: %v", err)
-	}
 
-	res, err := c.service.Events.List(cal.Id).Fields("items(updated,summary)", "summary", "nextPageToken").Do()
+func (c *GoogleCalendarDAL) ResolveEventList(calendarId string) []*gcal.Event {
+	minTime := time.Now().Format(time.RFC3339)
+	maxTime := time.Now().Add(time.Minute * 5).Format(time.RFC3339)
+	events,err := c.service.Events.List(calendarId).ShowHiddenInvitations(true).TimeMin(minTime).TimeMax(maxTime).SingleEvents(true).Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve calendar events list: %v", err)
+		log.Fatalf("Unable to retrieve list of events: %v", err)
 	}
-	for _, v := range res.Items {
-		fmt.Printf("Calendar ID %q event: %v: %q\n", cal.Id, v.Updated, v.Summary)
-	}
-	fmt.Printf("Calendar cal.Id %q Summary: %v\n", cal.Id, res.Summary)
-	fmt.Printf("Calendar cal.Id %q next page token: %v\n", cal.Id, res.NextPageToken)
+	return events.Items
 }
 
 func (c *GoogleCalendar) GetColor(calendarId string, userEmail string) string {
 	log.Infof("Checking Status")
-	minTime := time.Now().Format(time.RFC3339)
-	maxTime := time.Now().Add(time.Minute * 5).Format(time.RFC3339)
-	events, err := c.service.Events.List(calendarId).ShowHiddenInvitations(true).TimeMin(minTime).TimeMax(maxTime).SingleEvents(true).Do()
-	if err != nil {
-		log.Fatalf("Unable to retrieve list of events: %v", err)
-	}
-
+	events := c.dal.ResolveEventList(calendarId)
 	color := "green"
-	if len(events.Items) > 0 {
-		for _, event := range events.Items {
+	if len(events) > 0 {
+		for _,event := range events {
 			//log.Infof("%+v\n",event)
 			// if calendar is only free/busy access, we can only use confirmed status.
 			// If we have full acces check addtional attributes
@@ -98,31 +115,33 @@ func (c *GoogleCalendar) GetColor(calendarId string, userEmail string) string {
 	}
 	log.Infof("Setting light %s", color)
 	return color
+}
 
+
+
+
+
+/*
+*  Private Helpers
+*/
+
+
+
+func getCalendarService(token *oauth2.Token) (*gcal.Service, error) {
+	config := readConfig()
+	svc, err := gcal.New(config.Client(context.Background(), token))
+	return svc, err
 }
 
 func generateAccessToken() {
 	config := readConfig()
 	tok := getTokenFromWeb(config)
-	saveToken(tokFile, tok)
+	saveToken(getFullPath(tokFile), tok)
 }
 
-func getCalendarService() *gcal.Service {
-	tok, err := tokenFromFile(tokFile)
-	if err != nil {
-		log.Fatalln("No token.json found. Have you config init'd ?")
-		os.Exit(1)
-	}
-	config := readConfig()
-	svc, err := gcal.New(config.Client(context.Background(), tok))
-	if err != nil {
-		log.Fatalf("Unable to create Calendar service: %v", err)
-	}
-	return svc
-}
 
 func readConfig() *oauth2.Config {
-	b, err := ioutil.ReadFile("credentials.json")
+	b, err := ioutil.ReadFile(getFullPath(credsFile))
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
@@ -175,4 +194,12 @@ func saveToken(path string, token *oauth2.Token) {
 	if err := json.NewEncoder(f).Encode(token); err != nil {
 		log.Fatalf("Encoding issue: %v", err)
 	}
+}
+
+func getFullPath(path string) string{
+	return config.GetHomeDir() + configSuffix + path
+}
+
+func RemoveExistingGoogleAuthToken() {
+	os.Remove(getFullPath(tokFile))
 }
