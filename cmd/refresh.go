@@ -37,7 +37,7 @@ var calendarCmd = &cobra.Command{
 		nowHours, nowMinutes, _ := time.Now().Clock()
 		now := minutesOfDay(nowHours, nowMinutes)
 		log.Infof("Day: %s, TimeNow: %v:%v, onHour: %v:%02d, offHour: %v:%02d",today, nowHours, nowMinutes, schedule.OnHour, schedule.OnMinute, schedule.OffHour, schedule.OffMinute)
-		if onClock <= now && now < offClock && ! schedule.DaysOffContains(int(today)) {
+		if onClock <= now && now < offClock && ! schedule.DaysOffContains(today) {
 			log.Info("Time is within schedule. Run `config schedule` to set/adjust off hours")
 		} else {
 			log.Warn("Time is outside configured schedule, lights off. Run `config schedule` to change off hours")
@@ -60,7 +60,10 @@ var updateCmd = &cobra.Command{
 		email := viper.GetString("googleCalendar.email")
 
 		log.Infof("checking calendar %s for %s status", calendarId, email)
-		calendar := calendars.NewGoogleCalendarFromExistingToken()
-		light.SetColor(calendar.GetColor(calendarId, email))
+		if calendar,err := calendars.NewGoogleCalendar(); err != nil {
+			light.SetColor(calendar.GetColor(calendarId, email))
+		} else{
+			log.Fatal(err)
+		}
 	},
 }

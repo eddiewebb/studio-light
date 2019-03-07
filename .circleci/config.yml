@@ -24,6 +24,13 @@ jobs:
               tar -xz -C /go/bin gotestsum
 
       - run:
+          name: Hydrate credentials
+          command: |
+            mkdir -p ~/.studio-light/gcal
+            echo ${CREDS_64} | base64 --decode > ~/.studio-light/gcal/credentials.json
+            echo ${TOKEN_64} | base64 --decode > ~/.studio-light/gcal/token.json
+
+      - run:
           name: Test
           environment:
             GOTESTSUM_JUNITFILE: /tmp/test-reports/go-test-report.xml

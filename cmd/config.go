@@ -18,8 +18,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"strconv"
-	"strings"
 
 	"github.com/eddiewebb/blync-studio-light/calendars"
 	"github.com/eddiewebb/blync-studio-light/config"
@@ -31,6 +29,7 @@ var C config.Configuration
 func init() {
 	rootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(setConfigCmd)
+	configCmd.AddCommand(loginCmd)
 	configCmd.AddCommand(setScheduleCmd)
 }
 
@@ -66,9 +65,22 @@ var setConfigCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 		log.Infoln("config set in " + viper.ConfigFileUsed())
+	},
+}
 
-		gcal := calendars.NewGoogleCalendarFromNewToken()
-		gcal.Verify(newconfig.CalendarId)
+var loginCmd = &cobra.Command{
+	Use:   "login",
+	Short: "Force new auth token with Google Calendar",
+	Run: func(cmd *cobra.Command, args []string) {
+		calendarId := viper.GetString("googleCalendar.calendarId")
+		email := viper.GetString("googleCalendar.email")
+		calendars.RemoveExistingGoogleAuthToken()
+		gcal,err := calendars.NewGoogleCalendar()
+		if err != nil {
+			log.Fatal(err)
+		}
+		color := gcal.GetColor(calendarId, email)
+		log.Infof("The connected calendar shows status color or %s for user %s", color, email)
 	},
 }
 
@@ -96,32 +108,18 @@ func promptForCalValues() config.GoogleCalendarConfiguration {
 }
 
 func promptForScheduleValues() (scheduleConfig config.StudioLightSchedule) {
-	onHour, onMinute := asHoursAndMinutes(prompt("What ime (as HH:MM) should the light be allowed on? "))
-	offHour, offMinute := asHoursAndMinutes(prompt("What time (as HH:MM) should the light always be off? "))
-	daysOff := prompt("What days (as D,D) should the light always be off (use 0-6, start of week depends on your locale)? ")
+	onTime := prompt("What ime (as HH:MM) should the light be allowed on? ")
+	offTime := prompt("What time (as HH:MM) should the light always be off? ")
+	daysOff := prompt("What days (as Saturday, Sunday, etc) should the light always be off? ")
 
-	scheduleConfig = config.StudioLightSchedule{
-		OnHour:    onHour,
-		OnMinute:  onMinute,
-		OffHour:   offHour,
-		OffMinute: offMinute,
-		DaysOff:   daysOff,
+	scheduleConfig, err := config.NewSchedule(onTime, offTime, daysOff)
+	if err != nil {
+		log.Fatal(err)
 	}
-	return
+
+	return scheduleConfig
 }
 
-func asHoursAndMinutes(time string) (hours int, minutes int) {
-	parts := strings.Split(time, ":")
-	hours, err := strconv.Atoi(parts[0])
-	if err != nil || hours < 0 || hours > 23 {
-		log.Fatal("Not a valid number for time, please use HH:MM for hours with a 24 hour clock (0-23)")
-	}
-	minutes, merr := strconv.Atoi(parts[1])
-	if merr != nil || minutes < 0 || minutes > 59 {
-		log.Fatal("Not a valid number for time, please use HH:MM for minutes as 0-59")
-	}
-	return
-}
 
 func prompt(message string) string {
 	fmt.Print(message)
