@@ -12,11 +12,11 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(calendarCmd)
-	calendarCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(refreshCmd)
+	refreshCmd.AddCommand(calendarCmd)
 }
 
-var calendarCmd = &cobra.Command{
+var refreshCmd = &cobra.Command{
 	Use:   "refresh",
 	Short: "Interact with calendar (login)",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
@@ -52,18 +52,18 @@ func minutesOfDay(hour int, minutes int) int {
 }
 
 
-var updateCmd = &cobra.Command{
+var calendarCmd = &cobra.Command{
 	Use:   "calendar",
 	Short: "Set light based on calendar events",
 	Run: func(cmd *cobra.Command, args []string) {
 		calendarId := viper.GetString("googleCalendar.calendarId")
 		email := viper.GetString("googleCalendar.email")
 
-		log.Infof("checking calendar %s for %s status", calendarId, email)
+		log.Infof("Attempt to get calendar service", calendarId)
 		if calendar,err := calendars.NewGoogleCalendar(); err != nil {
+			log.Fatalf("Error accessing calendar %s: %v", calendarId,err)
+		}else{			
 			light.SetColor(calendar.GetColor(calendarId, email))
-		} else{
-			log.Fatal(err)
 		}
 	},
 }

@@ -39,6 +39,7 @@ type GoogleCalendar struct {
 func NewGoogleCalendar() (GoogleCalendar, error) {
 	token, err := tokenFromFile(getFullPath(tokFile))
 	if err != nil{
+		log.Warnf("No existing toke from %s, attempting to create new",tokFile)
 		generateAccessToken()
 		/*tok, err := tokenFromFile(token)
 		if err != nil {
@@ -50,16 +51,16 @@ func NewGoogleCalendar() (GoogleCalendar, error) {
 
 	service, err := getCalendarService(token)
 	if err != nil{
+		log.Warnf("Failed ot get calendar")
 		return GoogleCalendar{}, err
 	}
 	dal := GoogleCalendarDAL{
-
 		service : service,
 	}
 	cal := GoogleCalendar{
 		dal: &dal,
 	}
-	return cal, err
+	return cal, nil
 }
 
 
