@@ -1,11 +1,11 @@
-image: golang:latest
+image: golang:1.12.9-stretch
 
 variables:
   # Please edit to your GitLab project
   REPO_NAME: gitlab.com/eddiewebb/studio-light
 
 before_script:
-  - sudo apt-get -y install libusb-1.0-0-dev
+  - apt-get -y install libusb-1.0-0-dev
 
 stages:
   - test
