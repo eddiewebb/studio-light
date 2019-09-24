@@ -19,3 +19,8 @@ go based CLI to set Blync light based on calendar or manual interaction.
 ./blync-studio-light refresh calendar 
 
 ```
+
+## Building
+
+`CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build`
+
