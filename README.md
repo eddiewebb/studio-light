@@ -2,6 +2,8 @@
 
 go based CLI to set Blync light based on calendar or manual interaction.
 
+![Busy Calendar shows red light](assets/busy_red.png)
+![Open Calendar shows green light](assets/avail_green.png)
 
 
 [![CircleCI](https://circleci.com/gh/eddiewebb/blync-studio-light.svg?style=svg)](https://circleci.com/gh/eddiewebb/blync-studio-light)
