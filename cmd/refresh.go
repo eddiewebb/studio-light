@@ -59,7 +59,7 @@ var calendarCmd = &cobra.Command{
 		calendarId := viper.GetString("googleCalendar.calendarId")
 		email := viper.GetString("googleCalendar.email")
 
-		log.Infof("Attempt to get calendar service", calendarId)
+		log.Infof("Attempt to get calendar service for cal ID: %s", calendarId)
 		if calendar,err := calendars.NewGoogleCalendar(); err != nil {
 			log.Fatalf("Error accessing calendar %s: %v", calendarId,err)
 		}else{			
