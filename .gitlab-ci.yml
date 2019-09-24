@@ -16,6 +16,9 @@ stages:
 format:
   stage: test
   script:
+    - mkdir -p ~/.studio-light/gcal
+    - echo ${CREDS_64} | base64 --decode > ~/.studio-light/gcal/credentials.json
+    - echo ${TOKEN_64} | base64 --decode > ~/.studio-light/gcal/token.json
     - go fmt $(go list ./... | grep -v /vendor/)
     - go vet $(go list ./... | grep -v /vendor/)
     - go test -race $(go list ./... | grep -v /vendor/)
