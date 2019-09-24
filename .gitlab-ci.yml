@@ -27,7 +27,7 @@ compile:
   stage: build
   script:
     - go mod download
-    - CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build -race -ldflags "-extldflags '-static'" -o $CI_PROJECT_DIR/calendar-blync
+    - CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build -o $CI_PROJECT_DIR/calendar-blync
   artifacts:
     paths:
       - calendar-blync
