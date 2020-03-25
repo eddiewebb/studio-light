@@ -1,42 +1,43 @@
 package config
 
 import (
-"fmt"
-"time"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
-	"github.com/spf13/viper"
+	"time"
+
 	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
-	"os"
-
+	"github.com/spf13/viper"
 )
 
 var DaysOfWeek = map[string]time.Weekday{
-    "Sunday":    time.Sunday,
-    "Monday":    time.Monday,
-    "Tuesday":   time.Tuesday,
-    "Wednesday": time.Wednesday,
-    "Thursday":  time.Thursday,
-    "Friday":    time.Friday,
-    "Saturday":  time.Saturday,
+	"Sunday":    time.Sunday,
+	"Monday":    time.Monday,
+	"Tuesday":   time.Tuesday,
+	"Wednesday": time.Wednesday,
+	"Thursday":  time.Thursday,
+	"Friday":    time.Friday,
+	"Saturday":  time.Saturday,
 }
-
 
 type Configuration struct {
 	GoogleCalendar GoogleCalendarConfiguration
 	Schedule       StudioLightSchedule
-	ConfigFile 	   string
+	ConfigFile     string
 }
 
 // initConfig reads in config file and ENV variables if set.
 func (c *Configuration) InitConfig() string {
+	log.Infoln("Initalize Config")
 	if c.ConfigFile != "" {
+		log.Infoln("Config path provided as " + c.ConfigFile)
 		// Use config file from the flag.
 		viper.SetConfigFile(c.ConfigFile)
 	} else {
 		// Find home directory.
-
+		log.Infoln("Loading default config file path")
 		// Search config in home directory with name ".blync-studio-light" (without extension).
 		viper.AddConfigPath(GetHomeDir())
 		viper.SetConfigName(".blync-studio-light")
@@ -51,10 +52,10 @@ func (c *Configuration) InitConfig() string {
 	} else {
 		log.Warnf("No configuration found at  %s, functionality will be limited until you run `config init\n", c.ConfigFile)
 	}
-	return viper.ConfigFileUsed()
+	return c.ConfigFile
 }
 
-func GetHomeDir() (string) {
+func GetHomeDir() string {
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Println(err)
@@ -63,23 +64,20 @@ func GetHomeDir() (string) {
 	return home
 }
 
-
 type GoogleCalendarConfiguration struct {
 	CalendarId string
 	Email      string
 }
-
-
 
 type StudioLightSchedule struct {
 	OnHour    int
 	OnMinute  int
 	OffHour   int
 	OffMinute int
-	DaysOff	  []time.Weekday 
+	DaysOff   []time.Weekday
 }
 
-func NewSchedule(on string, off string, days string)  (s StudioLightSchedule, e error) {
+func NewSchedule(on string, off string, days string) (s StudioLightSchedule, e error) {
 	onHour, onMinutes, err := asHoursAndMinutes(on)
 	if err != nil {
 		e = err
@@ -94,27 +92,27 @@ func NewSchedule(on string, off string, days string)  (s StudioLightSchedule, e 
 	}
 
 	s = StudioLightSchedule{
-		OnHour: onHour,
-		OnMinute: onMinutes,
-		OffHour: offHour,
+		OnHour:    onHour,
+		OnMinute:  onMinutes,
+		OffHour:   offHour,
 		OffMinute: offMinutes,
-		DaysOff: daysOff,
+		DaysOff:   daysOff,
 	}
-	return 
+	return
 }
 
-func parseWeekdays(commaDays string) (days []time.Weekday,e error) {
+func parseWeekdays(commaDays string) (days []time.Weekday, e error) {
 	if commaDays == "" {
 		return
 	}
-	for _, d := range strings.Split(commaDays,",") {
-	    if day, ok := DaysOfWeek[strings.TrimSpace(d)]; ok {
-	        days = append(days, day)
-	    }else{
-	    	return days, fmt.Errorf("The string %s is not a valid day from %v\n", d, DaysOfWeek)
-	    }
+	for _, d := range strings.Split(commaDays, ",") {
+		if day, ok := DaysOfWeek[strings.TrimSpace(d)]; ok {
+			days = append(days, day)
+		} else {
+			return days, fmt.Errorf("The string %s is not a valid day from %v\n", d, DaysOfWeek)
+		}
 	}
-    return
+	return
 }
 
 func asHoursAndMinutes(time string) (hours int, minutes int, e error) {
@@ -133,12 +131,11 @@ func asHoursAndMinutes(time string) (hours int, minutes int, e error) {
 	return
 }
 
-func (s *StudioLightSchedule) DaysOffContains(day time.Weekday) bool{
-    for _, dayOff := range s.DaysOff {    	
-        if dayOff == day {
-            return true
-        }
-    }
-    return false
+func (s *StudioLightSchedule) DaysOffContains(day time.Weekday) bool {
+	for _, dayOff := range s.DaysOff {
+		if dayOff == day {
+			return true
+		}
+	}
+	return false
 }
-

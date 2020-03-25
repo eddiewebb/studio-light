@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -75,7 +76,8 @@ var loginCmd = &cobra.Command{
 		calendarId := viper.GetString("googleCalendar.calendarId")
 		email := viper.GetString("googleCalendar.email")
 		calendars.RemoveExistingGoogleAuthToken()
-		gcal,err := calendars.NewGoogleCalendar()
+		log.Infoln("loading calendar")
+		gcal, err := calendars.NewGoogleCalendar()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -119,7 +121,6 @@ func promptForScheduleValues() (scheduleConfig config.StudioLightSchedule) {
 
 	return scheduleConfig
 }
-
 
 func prompt(message string) string {
 	fmt.Print(message)

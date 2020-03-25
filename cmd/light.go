@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/eddiewebb/blync-studio-light/lights"
+	light "github.com/eddiewebb/blync-studio-light/lights"
 	"github.com/spf13/cobra"
 )
 

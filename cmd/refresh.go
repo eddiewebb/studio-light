@@ -1,14 +1,15 @@
 package cmd
 
 import (
+	"os"
+	"time"
+
 	"github.com/eddiewebb/blync-studio-light/calendars"
 	"github.com/eddiewebb/blync-studio-light/config"
-	"github.com/eddiewebb/blync-studio-light/lights"
+	light "github.com/eddiewebb/blync-studio-light/lights"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"time"
 )
 
 func init() {
@@ -36,8 +37,8 @@ var refreshCmd = &cobra.Command{
 		onClock := minutesOfDay(schedule.OnHour, schedule.OnMinute)
 		nowHours, nowMinutes, _ := time.Now().Clock()
 		now := minutesOfDay(nowHours, nowMinutes)
-		log.Infof("Day: %s, TimeNow: %v:%v, onHour: %v:%02d, offHour: %v:%02d",today, nowHours, nowMinutes, schedule.OnHour, schedule.OnMinute, schedule.OffHour, schedule.OffMinute)
-		if onClock <= now && now < offClock && ! schedule.DaysOffContains(today) {
+		log.Infof("Day: %s, TimeNow: %v:%v, onHour: %v:%02d, offHour: %v:%02d", today, nowHours, nowMinutes, schedule.OnHour, schedule.OnMinute, schedule.OffHour, schedule.OffMinute)
+		if onClock <= now && now < offClock && !schedule.DaysOffContains(today) {
 			log.Info("Time is within schedule. Run `config schedule` to set/adjust off hours")
 		} else {
 			log.Warn("Time is outside configured schedule, lights off. Run `config schedule` to change off hours")
@@ -51,7 +52,6 @@ func minutesOfDay(hour int, minutes int) int {
 	return (hour * 60) + minutes
 }
 
-
 var calendarCmd = &cobra.Command{
 	Use:   "calendar",
 	Short: "Set light based on calendar events",
@@ -60,9 +60,9 @@ var calendarCmd = &cobra.Command{
 		email := viper.GetString("googleCalendar.email")
 
 		log.Infof("Attempt to get calendar service for cal ID: %s", calendarId)
-		if calendar,err := calendars.NewGoogleCalendar(); err != nil {
-			log.Fatalf("Error accessing calendar %s: %v", calendarId,err)
-		}else{			
+		if calendar, err := calendars.NewGoogleCalendar(); err != nil {
+			log.Fatalf("Error accessing calendar %s: %v", calendarId, err)
+		} else {
 			light.SetColor(calendar.GetColor(calendarId, email))
 		}
 	},

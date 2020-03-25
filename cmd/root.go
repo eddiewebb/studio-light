@@ -16,12 +16,13 @@ package cmd
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 
+	log "github.com/sirupsen/logrus"
+
+	"github.com/eddiewebb/blync-studio-light/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/eddiewebb/blync-studio-light/config"
 )
 
 // default in initConfig, unless passed as flag
@@ -60,7 +61,6 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(configFromFlag)
-	log.SetLevel(log.WarnLevel)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.blync-studio-light.yaml)")
 	rootCmd.PersistentFlags().IntP("device", "d", 0, "Device index for light to interface with")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Include info level logs")
