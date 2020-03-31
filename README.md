@@ -8,6 +8,8 @@ go based CLI to set Blync light based on calendar or manual interaction.
 
 [![CircleCI](https://circleci.com/gh/eddiewebb/blync-studio-light.svg?style=svg)](https://circleci.com/gh/eddiewebb/blync-studio-light)
 
+
+## Configure schedule and interact with calendar
 ```
 ./blync-studio-light -h # help, options, etc
 
@@ -21,6 +23,23 @@ go based CLI to set Blync light based on calendar or manual interaction.
 ./blync-studio-light refresh calendar 
 
 ```
+
+
+
+## Get and provide google credentials.
+
+you need a credentials.json file fomr goolge that allows access to calendar APIs.  (https://console.cloud.google.com/apis/credentials)
+
+```
+mkdir -p ~/.studio-light/gcal
+mv ~/Downloads/client_secret[FILE YOU GO FROM GOOGLE].json ~/.studio-light/gcal/credentials.json
+
+
+~/go/bin/blync-studio-light config login
+# follow steps.
+```
+
+
 
 ## Building
 
