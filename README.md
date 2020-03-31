@@ -7,7 +7,7 @@ go based CLI to set Blync light based on calendar or manual interaction.
 I hang my light outside my home office to convey to family if they can visit.
 
 ![Red means don't go in, sad daughter.  Green means it's ok to visit daddy, happy daughter!](assets/izzyexplains.jpg)
-
+Red means don't go in, sad daughter.  Green means it's ok to visit daddy, happy daughter!
 
 ### Light updates based on free/busy events.
 ![Busy Calendar shows red light](assets/busy_red.png)
