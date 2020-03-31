@@ -2,25 +2,38 @@
 
 go based CLI to set Blync light based on calendar or manual interaction.
 
+
+### here is a picture my daughter drew to explain. 
+I hang my light outside my home office to convey to family if they can visit.
+
+![Red means don't go in, sad daughter.  Green means it's ok to visit daddy, happy daughter!](assets/izzyexplains.jpg)
+
+
+### Light updates based on free/busy events.
 ![Busy Calendar shows red light](assets/busy_red.png)
 ![Open Calendar shows green light](assets/avail_green.png)
 
 
-[![CircleCI](https://circleci.com/gh/eddiewebb/blync-studio-light.svg?style=svg)](https://circleci.com/gh/eddiewebb/blync-studio-light)
+
+## Build / Install
+You can leave in a working driectory as build, or install to central repo this doc aassumes install.
+```
+CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go install
+
+
+~/go/bin/blync-studio-light -h 
+```
 
 
 ## Configure schedule and interact with calendar
 ```
-./blync-studio-light -h # help, options, etc
+~/go/bin/blync-studio-light -h # help, options, etc
 
 
 # get started
-./blync-studio-light config init
-./blync-studio-light config schedule #(optional to set working hours and days off which light will go dark)
+~/go/bin/blync-studio-light config init
+~/go/bin/blync-studio-light config schedule #(optional to set working hours and days off which light will go dark)
 
-
-# update liht based on calendar
-./blync-studio-light refresh calendar 
 
 ```
 
@@ -36,12 +49,27 @@ mv ~/Downloads/client_secret[FILE YOU GO FROM GOOGLE].json ~/.studio-light/gcal/
 
 
 ~/go/bin/blync-studio-light config login
-# follow steps.
+# follow steps.git 
+```
+
+## Keeping the light accurate
+```
+
+# add this command to crontab
+~/go/bin/blync-studio-light calendar refresh
+
+```
+
+### Example Cron file
+```
+# Run every minute, do not send mail.
+* * * * * /Users/ewebbinaro/go/bin/blync-studio-light > /dev/null 2>&1
 ```
 
 
+## Building /Testing
 
-## Building
+Due to the HID dependencies used by this prohect, you need to allow unsupported flags.
 
 `CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build`
 
