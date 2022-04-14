@@ -1,7 +1,7 @@
 package light
 
 import (
-	"github.com/eddiewebb/goblync"
+	"github.com/eddiewebb/blync-studio-light/blync"
 	"github.com/spf13/viper"
 )
 
