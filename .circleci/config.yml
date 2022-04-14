@@ -59,11 +59,30 @@ jobs:
           mkdir -p /go/pkg/mod
           go mod download
           golangci-lint run
-
+  
+  arm:
+    executor: golang
+    steps:
+      - checkout
+      - run:
+          name: Install
+          command: |
+            sudo apt-get -y install libusb-1.0-0-dev
+            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.12.5
+      - run: |
+          export PATH=$PATH:./bin
+          mkdir -p /go/pkg/mod
+          go mod download
+          GOOS=linux CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build
+      - store_artifacts:
+          path: blync-studio-light
+      
+        
 
 workflows:
   version: 2
   workflow:
     jobs:
+      - arm
       - test
       - lint
