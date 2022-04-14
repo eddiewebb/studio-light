@@ -14,8 +14,6 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/eddiewebb/goblync v0.0.0-20151214232719-d5f54f59e81b h1:4fBgWIntLC5LUX+6Emn7vIHOlI4/zuZynXIhm6yh0rY=
 github.com/eddiewebb/goblync v0.0.0-20151214232719-d5f54f59e81b/go.mod h1:wwjrW4VdP4NCWVDaD0GrIZBhSVtFHQqKbJBrOaZr2d8=
-github.com/eddiewebb/hid v0.0.0-20190226232454-cc6173fefbcb h1:mbv0bnrAuxmFP6+itrOUJvcMcJWfhzsuddbNicp71UA=
-github.com/eddiewebb/hid v0.0.0-20190226232454-cc6173fefbcb/go.mod h1:mDgXJqzBQfVPDoEub77AFBwOib3xh2RIjeiTTfQgiwc=
 github.com/eddiewebb/hid v0.0.0-20220414012659-7cecc8ab3992 h1:uGOFWs4GfNoZig8PktGi/FsTLjycggIJZkkt0CYIUNg=
 github.com/eddiewebb/hid v0.0.0-20220414012659-7cecc8ab3992/go.mod h1:4DL7AXKllxXlMLnHUfpWIMkySYntqA5TyjCe5+q8dGQ=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
@@ -118,8 +116,9 @@ google.golang.org/grpc v1.17.0/go.mod h1:6QZJwpn2B+Zp71q/5VxRsJ6NXXVCE5NRUHRo+f3
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
-gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
+gopkg.in/yaml.v2 v2.4.0/go.mod h1:RDklbk79AGWmwhnvt/jBztapEOGDOx6ZbXqjP6csGnQ=
 gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
 gotest.tools v2.2.0+incompatible/go.mod h1:DsYFclhRJ6vuDpmuTbkuFWG+y2sxOXAzmJt81HFBacw=
 honnef.co/go/tools v0.0.0-20180728063816-88497007e858/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
