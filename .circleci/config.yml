@@ -73,6 +73,9 @@ jobs:
           go mod download
           go mod tidy
           env CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  GOOS=linux GOARCH=arm GOARM=5 CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build
+          #64bit for home assistnt
+          env CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  GOOS=linux GOARCH=arm CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' CGO_LDFLAGS='--sysroot /usr/lib/gcc-cross/arm-linux-gnueabihf/9/' CGO_CFFLAGS='--sysroot /usr/lib/gcc-cross/arm-linux-gnueabihf/9/' go build -v 
+
       - store_artifacts:
           path: blync-studio-light
       
