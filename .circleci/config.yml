@@ -71,7 +71,13 @@ jobs:
       - run:
           name: Install
           command: |
-            sudo apt update -y && sudo apt-get -y install libusb-1.0-0-dev 
+            sudo apt update -y && sudo apt -y install libusb-1.0-0-dev 
+            wget https://go.dev/dl/go1.18.1.linux-arm64.tar.gz
+            tar -xzf go1.18.1.linux-arm64.tar.gz 
+            sudo rm -rf /usr/local/go
+            sudo mv go /usr/local/
+            go version
+
       - run: |
           go mod download
           go mod tidy
