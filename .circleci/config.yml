@@ -4,6 +4,10 @@ executors:
   golang: 
     docker:
       - image: cimg/go:1.17
+  armlang:
+    machine:
+      image: ubuntu-2004:202101-01
+    resource_class: arm.medium
 
 jobs:
   test:
@@ -61,20 +65,27 @@ jobs:
           golangci-lint run
   
   arm:
-    executor: golang
+    executor: armlang
     steps:
       - checkout
       - run:
           name: Install
           command: |
-            sudo apt update -y && sudo apt-get -y install libusb-1.0-0-dev gcc-arm-linux-gnueabihf
-            curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v1.12.5
+            sudo apt update -y && sudo apt-get -y install libusb-1.0-0-dev 
       - run: |
           go mod download
           go mod tidy
-          env CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  GOOS=linux GOARCH=arm GOARM=5 CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build
+          env CGO_ENABLED=1 CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build
           #64bit for home assistnt
-          env CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  GOOS=linux GOARCH=arm CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' CGO_LDFLAGS='--sysroot /usr/lib/gcc-cross/arm-linux-gnueabihf/9/' CGO_CFFLAGS='--sysroot /usr/lib/gcc-cross/arm-linux-gnueabihf/9/' go build -v 
+          #export GOOS=linux
+          #export GOARCH=arm64
+          #export CGO_ENABLED=1
+          #export CC=aarch64-linux-gnu-gcc
+          #export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+          #export CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' 
+          #export CGO_LDFLAGS='--sysroot /usr/lib/aarch64-linux-gnu/' 
+          #export CGO_CFFLAGS='--sysroot /usr/lib/aarch64-linux-gnu/' 
+          #go build -v 
 
       - store_artifacts:
           path: blync-studio-light
@@ -86,5 +97,5 @@ workflows:
   workflow:
     jobs:
       - arm
-      - test
-      - lint
+      #- test
+     # - lint
