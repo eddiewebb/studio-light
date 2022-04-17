@@ -82,6 +82,9 @@ jobs:
           go mod download
           go mod tidy
           env CGO_ENABLED=1 CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build
+          mv blync-studio-light blync-studio-light-arm64
+          env GOARCH=arm GOARM=5 CGO_ENABLED=1 CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build
+          mv blync-studio-light blync-studio-light-armhf
           #64bit for home assistnt
           #export GOOS=linux
           #export GOARCH=arm64
@@ -94,7 +97,7 @@ jobs:
           #go build -v 
 
       - store_artifacts:
-          path: blync-studio-light
+          path: blync-studio-light*
       
         
 
