@@ -71,7 +71,7 @@ jobs:
       - run:
           name: Install
           command: |
-            sudo apt update -y && sudo apt -y install libusb-1.0-0-dev 
+            sudo apt update -y && sudo apt -y install libusb-1.0-0-dev gcc-arm-linux-gnueabihf
             wget https://go.dev/dl/go1.18.1.linux-arm64.tar.gz
             tar -xzf go1.18.1.linux-arm64.tar.gz 
             sudo rm -rf /usr/local/go
@@ -79,13 +79,14 @@ jobs:
             go version
 
       - run: |
+          mkdir output
           go mod download
           go mod tidy
           env CGO_ENABLED=1 CGO_LDFLAGS_ALLOW='-fconstant-cfstrings' go build
-          mv blync-studio-light blync-studio-light-arm64
+          mv blync-studio-light output/blync-studio-light-arm64
 
           #32bit for home assistnt 
-          sudo dpkg --add-architecture armhf && sudo apt update -y && sudo apt -y install libusb-1.0-0-dev gcc-arm-linux-gnueabi
+          sudo dpkg --add-architecture armhf && sudo apt update -y && sudo apt -y install libusb-1.0-0-dev:armhf gcc-arm-linux-gnueabihf
           export GOARCH=arm
           export GOARM=5
           export CGO_ENABLED=1
@@ -94,11 +95,11 @@ jobs:
           export LIBRARY_PATH=/usr/arm-linux-gnueabihf/lib
           export C_INCLUDE_PATH=/usr/arm-linux-gnueabihf/include/
           go build -v 
-          mv blync-studio-light blync-studio-light-armhf
+          mv blync-studio-light output/blync-studio-light-armhf
          
 
       - store_artifacts:
-          path: blync-studio-light*
+          path: output
       
         
 
