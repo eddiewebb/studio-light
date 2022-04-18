@@ -85,7 +85,7 @@ jobs:
           mv blync-studio-light blync-studio-light-arm64
 
           #32bit for home assistnt 
-          sudo dpkg --add-architecture armhf && sudo apt update -y && sudo apt -y install libusb-1.0-0-dev arm-linux-gnueabihf-gcc
+          sudo dpkg --add-architecture armhf && sudo apt update -y && sudo apt -y install libusb-1.0-0-dev
           export GOARCH=arm
           export GOARM=5
           export CGO_ENABLED=1
