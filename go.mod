@@ -11,7 +11,7 @@ require (
 	github.com/sirupsen/logrus v1.3.0
 	github.com/spf13/cobra v0.0.3
 	github.com/spf13/viper v1.3.1
-	golang.org/x/net v0.0.0-20190227160552-c95aed5357e7
+	golang.org/x/net v0.7.0
 	golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421
 	google.golang.org/api v0.1.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
